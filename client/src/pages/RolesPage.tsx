@@ -49,7 +49,7 @@ const RolesPage: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Roles</h1>
+      <h1 className="text-2xl font-bold mb-10">Assign Module related actions for Roles</h1>
       <div className="grid grid-cols-3 gap-4">
         <div>
           <h2 className="text-xl font-bold mb-2">Roles</h2>

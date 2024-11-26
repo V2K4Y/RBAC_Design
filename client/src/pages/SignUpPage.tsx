@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/api';
 import { SignUpFormData } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState<SignUpFormData>({
     username: '',
@@ -30,10 +32,23 @@ const SignUpPage: React.FC = () => {
 
     try {
       const response = await signup(formData.username, formData.email, formData.password);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('role', response.user.role); // Save user role for protected routes
-      navigate('/dashboard'); // Redirect to dashboard after successful signup
+
+      // If user doesn't have a role, redirect them to the home page
+      if (!response.data.user.roles) {
+        navigate('/');  // Redirect to the home page after successful sign-up
+      } else {
+        localStorage.setItem('token', response.data.token);
+
+        const roles = response.data.user?.roles;
+
+        // Save user role for protected routes
+        localStorage.setItem('role', JSON.stringify(roles));
+
+        setIsAuthenticated(true);
+        navigate('/'); // Redirect to dashboard if the user has a role
+      }
     } catch (error: any) {
+      console.log("Some error: ", error)
       setErrorMessage(error.response?.data?.message || 'Signup failed');
     }
   };
@@ -81,6 +96,19 @@ const SignUpPage: React.FC = () => {
             Sign Up
           </button>
         </form>
+
+        {/* Switch to Login Link */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <button
+              onClick={() => navigate('/login')}
+              className="text-blue-500 hover:underline"
+            >
+              Login
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

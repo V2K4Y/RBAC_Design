@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api';
 import { LoginFormData } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -30,8 +32,13 @@ const LoginPage: React.FC = () => {
     try {
       const response = await login(formData.email, formData.password);
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', response.data.user?.role || 'Admin'); // Save user role for protected routes
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      const roles = response.data.user?.roles;
+      if (roles) {
+        // Save user role for protected routes
+        localStorage.setItem('role', JSON.stringify(roles));
+      }
+      setIsAuthenticated(true);
+      navigate('/'); // Redirect to dashboard after successful login
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Login failed');
     }
@@ -69,6 +76,19 @@ const LoginPage: React.FC = () => {
             Login
           </button>
         </form>
+
+        {/* Switch to Sign Up Link */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{' '}
+            <button
+              onClick={() => navigate('/signup')}
+              className="text-blue-500 hover:underline"
+            >
+              Sign Up
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

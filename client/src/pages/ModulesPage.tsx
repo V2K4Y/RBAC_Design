@@ -45,7 +45,7 @@ const ModulesPage: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Modules</h1>
+      <h1 className="text-2xl font-bold mb-10">Assign Actions to Modules</h1>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h2 className="text-xl font-bold mb-2">Modules</h2>

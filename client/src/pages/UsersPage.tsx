@@ -46,7 +46,7 @@ const UsersPage: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Users</h1>
+      <h1 className="text-2xl font-bold mb-10">Assign Roles to the User</h1>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h2 className="text-xl font-bold mb-2">Users</h2>

@@ -1,18 +1,21 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    navigate('/login'); // Redirect to login page after logout
+    setIsAuthenticated(false);
+    navigate('/'); // Redirect to login page after logout
   };
 
   return (
-    <div className="w-64 bg-gray-800 text-white h-screen flex flex-col">
-      <div className="p-6 font-bold text-xl">RBAC Dashboard</div>
-      <nav className="flex-grow">
+    <div className="fixed top-0 left-0 w-64 bg-gray-800 text-white h-full">
+      <div className="p-6 font-bold text-xl cursor-pointer mb-3" onClick={() => navigate('/')}>RBAC Dashboard</div>
+      <nav className="flex flex-col gap-2 flex-grow">
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
