@@ -1,14 +1,22 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
-const Sidebar = () => {
+const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login'); // Redirect to login page after logout
+  };
+
   return (
-    <div className="w-64 bg-gray-800 h-screen text-white">
+    <div className="w-64 bg-gray-800 text-white h-screen flex flex-col">
       <div className="p-6 font-bold text-xl">RBAC Dashboard</div>
-      <nav className="mt-6">
+      <nav className="flex-grow">
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
-            isActive ? 'block p-4 bg-gray-700' : 'block p-4 hover:bg-gray-700'
+            isActive ? 'block px-4 py-2 bg-gray-700' : 'block px-4 py-2 hover:bg-gray-700'
           }
         >
           Dashboard
@@ -16,7 +24,7 @@ const Sidebar = () => {
         <NavLink
           to="/modules"
           className={({ isActive }) =>
-            isActive ? 'block p-4 bg-gray-700' : 'block p-4 hover:bg-gray-700'
+            isActive ? 'block px-4 py-2 bg-gray-700' : 'block px-4 py-2 hover:bg-gray-700'
           }
         >
           Modules
@@ -24,7 +32,7 @@ const Sidebar = () => {
         <NavLink
           to="/roles"
           className={({ isActive }) =>
-            isActive ? 'block p-4 bg-gray-700' : 'block p-4 hover:bg-gray-700'
+            isActive ? 'block px-4 py-2 bg-gray-700' : 'block px-4 py-2 hover:bg-gray-700'
           }
         >
           Roles
@@ -32,20 +40,18 @@ const Sidebar = () => {
         <NavLink
           to="/users"
           className={({ isActive }) =>
-            isActive ? 'block p-4 bg-gray-700' : 'block p-4 hover:bg-gray-700'
+            isActive ? 'block px-4 py-2 bg-gray-700' : 'block px-4 py-2 hover:bg-gray-700'
           }
         >
           Users
         </NavLink>
-        <NavLink
-          to="/create-entities"
-          className={({ isActive }) =>
-            isActive ? 'block p-4 bg-gray-700' : 'block p-4 hover:bg-gray-700'
-          }
-        >
-          Create Entities
-        </NavLink>
       </nav>
+      <button
+        onClick={handleLogout}
+        className="mt-auto mb-6 px-4 py-2 bg-red-600 text-white rounded absolute bottom-6 left-6 w-48"
+      >
+        Logout
+      </button>
     </div>
   );
 };

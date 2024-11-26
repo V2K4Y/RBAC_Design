@@ -18,4 +18,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export const login = async (email: string, password: string) => {
+  const response = await api.post('/auth/login', { email, password });
+  return response.data;
+};
+
+export const signup = async (username: string, email: string, password: string) => {
+  const response = await api.post('/auth/signup', { username, email, password });
+  return response.data;
+};
+
+export const verifyToken = async () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      await api.get('/verify-token'); // Example route for token validation
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  return false;
+};
+
 export default api;

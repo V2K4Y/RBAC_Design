@@ -1,16 +1,23 @@
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import ModulesPage from './pages/ModulesPage';
 import RolesPage from './pages/RolesPage';
 import UsersPage from './pages/UsersPage';
-// import ProtectedRoute from './components/ProtectedRoute';
-import CreateEntitiesPage from './pages/CreateEntitiesPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// App Component
 const App: React.FC = () => {
-  // Simulated user role (this should come from your authentication logic)
-  // const userRole = localStorage.getItem('role'); // "Admin", "Editor", etc.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   return (
     <Router>
@@ -19,49 +26,46 @@ const App: React.FC = () => {
         <Sidebar />
         <div className="flex-grow p-6 bg-gray-100">
           <Routes>
-            {/* Dashboard Route (Accessible to all authenticated users) */}
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
 
-            {/* Modules Route (Protected for Admins) */}
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Editor']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/modules"
               element={
-                // <ProtectedRoute allowedRoles={['Admin']} userRole={userRole}>
+                <ProtectedRoute allowedRoles={['Admin']}>
                   <ModulesPage />
-                // </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
-            <Route
-              path='/create-entities'
-              element={
-                // <ProtectedRoute allowedRoles={['Admin']} userRole={userRole}>
-                  <CreateEntitiesPage />
-                // </ProtectedRoute>
-              } 
-            />
-
-            {/* Roles Route (Protected for Admins) */}
             <Route
               path="/roles"
               element={
-                // <ProtectedRoute allowedRoles={['Admin']} userRole={userRole}>
+                <ProtectedRoute allowedRoles={['Admin']}>
                   <RolesPage />
-                // </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
-
-            {/* Users Route (Protected for Admins) */}
             <Route
               path="/users"
               element={
-                // <ProtectedRoute allowedRoles={['Admin']} userRole={userRole}>
+                <ProtectedRoute allowedRoles={['Admin']}>
                   <UsersPage />
-                // </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
 
-            {/* Redirect to Dashboard if route not found */}
-            <Route path="*" element={<Dashboard />} />
+            {/* Redirect to login if no token is found */}
+            <Route path="*" element={isAuthenticated ? <Dashboard /> : <LoginPage />} />
           </Routes>
         </div>
       </div>
