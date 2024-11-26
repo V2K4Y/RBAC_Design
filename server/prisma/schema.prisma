@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  email     String     @unique
+  password  String
+  roles     UserRole[] // Relation to UserRole (many-to-many via UserRole table)
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Role {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @unique
+  description         String?
+  users               UserRole[]           // Relation to UserRole (many-to-many via UserRole table)
+  moduleActionsRoles  ModuleActionsRole[]  // Relation to ModuleActionsRole
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Module {
+  id        Int            @id @default(autoincrement())
+  name      String         @unique
+  moduleActions ModuleAction[] // Relation to ModuleAction (one-to-many)
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Action {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique  // Examples: 'create', 'view', 'update', 'delete'
+  description String?    // Optional: a description of the action
+  moduleActions ModuleAction[] // Relation to ModuleAction (one-to-many)
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model ModuleAction {
+  id        Int                  @id @default(autoincrement())
+  moduleId  Int
+  actionId  Int
+  module    Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  action    Action               @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  roles     ModuleActionsRole[]  // Relation to ModuleActionsRole (many-to-many via ModuleActionsRole table)
+
+  @@unique([moduleId, actionId]) // Ensure a unique combination of module and action
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model ModuleActionsRole {
+  id            Int          @id @default(autoincrement())
+  roleId        Int
+  moduleActionId Int
+  role          Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  moduleAction  ModuleAction @relation(fields: [moduleActionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, moduleActionId]) // Ensure no duplicate entries for the same role and action
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model UserRole {
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  roleId  Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId]) // Ensure no duplicate role assignments for a user
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
