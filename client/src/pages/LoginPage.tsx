@@ -31,11 +31,11 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await login(formData.email, formData.password);
-
+      
       const roles = response.data.roles;
       localStorage.setItem('role', JSON.stringify(roles));
       setIsAuthenticated(true);
-      navigate('/'); // Redirect to home page after successful login
+      // navigate('/'); // Redirect to home page after successful login
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Login failed');
     }

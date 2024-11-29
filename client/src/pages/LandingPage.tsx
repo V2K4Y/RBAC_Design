@@ -1,16 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleLogin = () => {
-    navigate('/login'); // Navigate to login page
-  };
-
-  const handleSignUp = () => {
-    navigate('/signup'); // Navigate to signup page
-  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 max-h-screen">
@@ -45,24 +35,6 @@ const LandingPage: React.FC = () => {
             <li>✔ Simplified role management for better scalability.</li>
           </ul>
         </div>
-
-        {/* Call-to-Action */}
-        {/* <div className="flex justify-center gap-6">
-          <button
-            onClick={handleLogin}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
-          >
-            Log In
-          </button>
-          <button
-            onClick={handleSignUp}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
-          >
-            Sign Up
-          </button>
-        </div> */}
-
-        {/* Explanation Section */}
         <div className="mt-8 text-sm text-gray-600">
           <p>RBAC gives you the flexibility to define and manage roles across your application.</p>
           <p className="mt-2">Assign roles such as Admin, Editor, Viewer, and more to ensure only authorized users have access to sensitive areas of the application.</p>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/api';
 import { SignUpFormData } from '../types';
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState<SignUpFormData>({
     username: '',
@@ -43,13 +43,19 @@ const SignUpPage: React.FC = () => {
         localStorage.setItem('role', JSON.stringify(roles));
 
         setIsAuthenticated(true);
-        navigate('/'); // Redirect to dashboard if the user has a role
+        // navigate('/'); // Redirect to dashboard if the user has a role
       }
     } catch (error: any) {
       console.log("Some error: ", error)
       setErrorMessage(error.response?.data?.message || 'Signup failed');
     }
   };
+
+  useEffect(() => {
+    if(isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated])
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
