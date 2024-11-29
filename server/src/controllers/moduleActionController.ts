@@ -20,8 +20,29 @@ export const getActionsForModuleController = async (req: Request, res: Response)
 
   try {
     const actions = await moduleActionService.getActionsForModule(parseInt(moduleId));
-    res.status(200).json(apiResponse('success', 'Actions for module retrieved successfully', actions));
+    const result = actions.map((moduleActions) => ({
+        id: moduleActions.action.id,
+        name: moduleActions.action.name
+    }))
+    res.status(200).json(apiResponse('success', 'Actions for module retrieved successfully', result));
   } catch (error) {
     res.status(500).json(apiResponse('error', 'Error retrieving actions for module', (error as any).message));
   }
 };
+
+export const getAllModuleActionsController = async (req: Request, res: Response) => {
+  try {
+    const moduleAction = await moduleActionService.getAllModuleActions();
+    const result = moduleAction.map((moduleAction) => ({
+      ...moduleAction,
+      moduleActions: moduleAction.moduleActions.map((action) => ({
+        id: action.action.id,
+        name: action.action.name,
+        moduleActionId: action.id
+      }))
+    }))
+    res.status(200).json(apiResponse('success', 'Retrieved all module and actions', result));
+  } catch (error) {
+    res.status(500).json(apiResponse('error', 'Error while fetching module-action', (error as any).message));
+  }
+}

@@ -5,74 +5,96 @@ import { generateToken } from '../utils/jwtUtils';
 
 // Sign Up Logic
 export const signUpUser = async (username: string, email: string, password: string) => {
-  // Check if a user already exists with the same email
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    throw new Error('User already exists with this email');
-  }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const ROLE_ADMIN = "Admin";
+  const ROLE_USER = "User";
+  
+  // Check if the user if first to register an if yes then the user already exists with the same email
+  return await prisma.$transaction( async (prisma) => {
+    const userCount = await prisma.user.count();
+    const roleName = userCount === 0 ? ROLE_ADMIN : ROLE_USER;
+    if(userCount !== 0) {
+      const existingUser = await prisma.user.findUnique({
+        where: {email},
+        select: {
+          id: true,
+          email: true,
+          username: true,
+        }
+      })
+      if(existingUser) {
+        throw new Error('User already exists with this email')
+      }
+    }
 
-  // Create a new user
-  const newUser = await prisma.user.create({
-    data: {
-      username,
-      email,
-      password: hashedPassword,
-    },
-  });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Check if the "User" role exists
-  let userRole = await prisma.role.findUnique({
-    where: { name: 'User' },
-  });
-
-  // If the "User" role does not exist, create it
-  if (!userRole) {
-    userRole = await prisma.role.create({
+    //create new user
+    const userDetails = await prisma.user.create({
       data: {
-        name: 'User', // Name of the role
+        username,
+        email,
+        password: hashedPassword,
       },
-    });
-  }
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      }
+    })
 
-  // Assign the "User" role to the new user
-  await prisma.userRole.create({
-    data: {
-      userId: newUser.id,
-      roleId: userRole.id,
-    },
-  });
+    let roleDetails = await prisma.role.findUnique({
+      where: {name: roleName},
+      select: {id: true, name: true}
+    })
 
-  // Generate a token for the new user
-  const token = generateToken(newUser.id, newUser.username);
+    if(!roleDetails) {
+      roleDetails = await prisma.role.create({
+        data: {
+          name: roleName,
+        }
+      })
+    }
 
-  // Fetch the roles assigned to the user
-  const roles = await prisma.role.findMany({
-    where: {
-      users: {
-        some: {
-          userId: newUser.id,
-        },
+    await prisma.userRole.create({
+      data: {
+        userId: userDetails.id,
+        roleId: roleDetails.id,
+      }
+    })
+
+    const role = await prisma.role.findMany({
+      where: {
+        users: {
+          some: {
+            userId: userDetails.id,
+          }
+        }
       },
-    },
-  });
+      select: {
+        name: true,
+      }
+    })
+    const token = generateToken(userDetails.id, userDetails.username);
 
-  return {
-    user: {
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      roles: roles.map((role) => role.name),
-    },
-    token,
-  };
+    return {
+      user: {
+        id: userDetails.id,
+        username: userDetails.username,
+        email: userDetails.email,
+        roles: role.map((r) => r.name)
+      },
+      token
+    }
+  })
 };
 
 
 // Login Logic
 export const loginUser = async (email: string, password: string) => {
   try {
+
+    // Although this query is efficient for small database but may take latency issue for large database so we'll different approach for larger databases
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -110,3 +132,21 @@ export const loginUser = async (email: string, password: string) => {
     }
   }
 };
+
+export const status = async (userId: number) => {
+  return await prisma.user.findUnique({
+    where: {id: userId},
+    select: {
+      username: true,
+      roles: {
+        select: {
+          role: {
+            select: {
+              name: true,
+            }
+          }
+        }
+      }
+    }
+  })
+}

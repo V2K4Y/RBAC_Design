@@ -1,14 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { logout } from '../services/api';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const { setIsAuthenticated } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+  const handleLogout = async() => {
+    await logout();
     setIsAuthenticated(false);
+    localStorage.removeItem('role');
     navigate('/'); // Redirect to login page after logout
   };
 
@@ -47,6 +48,14 @@ const Sidebar: React.FC = () => {
           }
         >
           Users
+        </NavLink>
+        <NavLink
+          to="/create-entity"
+          className={({ isActive }) =>
+            isActive ? 'block px-4 py-2 bg-gray-700' : 'block px-4 py-2 hover:bg-gray-700'
+          }
+        >
+          Create Entity
         </NavLink>
       </nav>
       <button

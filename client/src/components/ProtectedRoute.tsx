@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -7,12 +8,12 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const token = localStorage.getItem('token');
   const storedRoles = localStorage.getItem('role');
+  const { isAuthenticated } = useAuth();
   const roles: string[] = storedRoles ? JSON.parse(storedRoles) : []; // Parse stored roles
 
   // If no token or the roles do not match any of the allowedRoles, redirect to login
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   } else if (!roles.some((role: string) => allowedRoles.includes(role))) {
     console.log('Came to check role access')

@@ -33,7 +33,13 @@ export const editUser = async (req: Request, res: Response) => {
 export const getAllUsers = async (_: Request, res: Response) => {
   try {
     const users = await userService.getAllUsers();
-    res.status(200).json(users);
+    
+    const result = users.map((user) => ({
+      ...user,
+      roles: user.roles.map(roleEntry => roleEntry.role.name)
+    }))
+
+    res.status(200).json(result);
     return
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch users" });

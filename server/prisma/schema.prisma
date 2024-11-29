@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id        Int        @id @default(autoincrement())
-  username  String     @unique
+  username  String     
   email     String     @unique
   password  String
   roles     UserRole[] // Relation to UserRole (many-to-many via UserRole table)

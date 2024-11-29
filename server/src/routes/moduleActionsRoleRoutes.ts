@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/assign', moduleActionRoles.assignModuleActionToRoleController);
 
 // Get all ModuleActions for a Role
-router.get('/:roleId/module-actions', moduleActionRoles.getModuleActionsForRoleController);
+router.get('/', moduleActionRoles.getModuleActionsForRoleController);
 
 // Get all Roles for a ModuleAction
 router.get('/:moduleActionId/roles', moduleActionRoles.getRolesForModuleActionController);

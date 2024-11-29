@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import api, { status } from '../services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -11,12 +13,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
+    async function checkStatus() {
+      const res = await status();
+      if(res.status === 200) {setIsAuthenticated(true);}
+      else {setIsAuthenticated(false);}
     }
+    checkStatus();
   }, []);
 
   return (

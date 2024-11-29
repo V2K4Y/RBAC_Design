@@ -37,9 +37,7 @@ const SignUpPage: React.FC = () => {
       if (!response.data.user.roles) {
         navigate('/');  // Redirect to the home page after successful sign-up
       } else {
-        localStorage.setItem('token', response.data.token);
-
-        const roles = response.data.user?.roles;
+        const roles = response.data.data?.roles;
 
         // Save user role for protected routes
         localStorage.setItem('role', JSON.stringify(roles));

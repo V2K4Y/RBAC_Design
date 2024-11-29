@@ -24,8 +24,33 @@ export const assignActionToModule = async (moduleId: number, actionId: number) =
 export const getActionsForModule = async (moduleId: number) => {
   return prisma.moduleAction.findMany({
     where: { moduleId },
-    include: {
-      action: true, // Include action details like name, description
+    select: {
+      action: {
+        select: {
+          id: true,
+          name: true,
+        }
+      }, // Include action details like name, id
     },
   });
 };
+
+export const getAllModuleActions = async () => {
+  return prisma.module.findMany({
+    select: {
+      id: true,
+      name: true,
+      moduleActions: {
+        select: {
+          id: true,
+          action: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
+        }
+      }
+    }
+  })
+}

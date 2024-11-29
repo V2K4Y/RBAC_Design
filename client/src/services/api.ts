@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Add Authorization token to every request
@@ -27,6 +28,29 @@ export const signup = async (username: string, email: string, password: string) 
   const response = await api.post('/auth/signup', { username, email, password });
   return response.data;
 };
+
+// function to check weather user is authorized or not, it not then loggedout immediatelys
+export const status = async () => {
+  const response = await api.post('/auth/status');
+
+  function arraysEqual(arr1: any[], arr2: any[]): boolean {
+    if (arr1.length !== arr2.length) return false;
+    return arr1.sort().join(',') === arr2.sort().join(',');
+  }
+  const storedRoles = localStorage.getItem('role');
+  const fetchedRoles = response.data.data || [];
+  const roles: string[] = storedRoles ? JSON.parse(storedRoles) : [];
+  if(!arraysEqual(roles, fetchedRoles)) {
+    await api.post('/auth/logout');
+    response.status = 404;
+  }
+  return response;
+}
+
+export const logout = async () => {
+  const response = await api.post('/auth/logout');
+  return response;
+}
 
 export const verifyToken = async () => {
   const token = localStorage.getItem('token');

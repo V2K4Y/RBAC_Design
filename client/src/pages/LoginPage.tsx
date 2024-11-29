@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api';
 import { LoginFormData } from '../types';
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -31,18 +31,21 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await login(formData.email, formData.password);
-      localStorage.setItem('token', response.data.token);
-      const roles = response.data.user?.roles;
-      if (roles) {
-        // Save user role for protected routes
-        localStorage.setItem('role', JSON.stringify(roles));
-      }
+
+      const roles = response.data.roles;
+      localStorage.setItem('role', JSON.stringify(roles));
       setIsAuthenticated(true);
-      navigate('/'); // Redirect to dashboard after successful login
+      navigate('/'); // Redirect to home page after successful login
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Login failed');
     }
   };
+
+  useEffect(() => {
+    if(isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated])
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">

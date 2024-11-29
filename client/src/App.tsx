@@ -12,6 +12,7 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 import HomePage from './pages/HomePage';
 import { useAuth } from './context/AuthContext'; // Import context
 import LandingPage from './pages/LandingPage';
+import CreateEntitiesPage from './pages/CreateEntitiesPage';
 
 const App: React.FC = () => {
   const { isAuthenticated } = useAuth(); // Access the auth state from context
@@ -60,6 +61,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRoles={['Admin']}>
                     <UsersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-entity"
+                element={
+                  <ProtectedRoute allowedRoles={['Admin']}>
+                    <CreateEntitiesPage />
                   </ProtectedRoute>
                 }
               />

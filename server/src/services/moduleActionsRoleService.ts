@@ -22,17 +22,40 @@ export const assignModuleActionToRole = async (roleId: number, moduleActionId: n
 
 // Get ModuleActions for a Role
 export const getModuleActionsForRole = async (roleId: number) => {
-  return prisma.moduleActionsRole.findMany({
-    where: { roleId },
-    include: {
-      moduleAction: {
-        include: {
-          module: true, // Include module details
-          action: true, // Include action details
+  // return prisma.moduleActionsRole.findMany({
+  //   include: {
+  //     moduleAction: {
+  //       include: {
+  //         module: true, // Include module details
+  //         action: true, // Include action details
+  //       },
+  //     },
+  //   },
+  // });
+  return prisma.role.findMany({
+    select: {
+      id: true,
+      name: true,
+      moduleActionsRoles: {
+        select: {
+          moduleAction: {
+            select: {
+              module: {
+                select: {
+                  name: true,
+                },
+              },
+              action: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       },
     },
-  });
+  });  
 };
 
 // Get Roles for a ModuleAction

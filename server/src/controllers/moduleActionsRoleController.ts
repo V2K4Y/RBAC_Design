@@ -20,7 +20,33 @@ export const getModuleActionsForRoleController = async (req: Request, res: Respo
 
   try {
     const moduleActions = await moduleActionRoles.getModuleActionsForRole(parseInt(roleId));
-    res.status(200).json(apiResponse('success', 'ModuleActions for role retrieved successfully', moduleActions));
+
+    const result = moduleActions.map((ma: any) => {
+
+      const moduleActionMap = ma.moduleActionsRoles.reduce((acc: Record<string, string[]>, item: any) => {
+
+        const module = item.moduleAction.module.name;
+        const action = item.moduleAction.action.name;
+        if(!acc[module]) {
+          acc[module] = [];
+        }
+        acc[module].push(action);
+        return acc;
+      }, {})
+
+      const moduleAction = Object.entries(moduleActionMap).map(([module, action]) => ({
+        module, action
+      }))
+
+      return {
+        id: ma.id,
+        roleName: ma.name,
+        moduleAction
+      }
+      
+    })
+
+    res.status(200).json(apiResponse('success', 'ModuleActions for role retrieved successfully', result));
   } catch (error) {
     res.status(500).json(apiResponse('error', 'Error retrieving ModuleActions for role', (error as any).message));
   }
