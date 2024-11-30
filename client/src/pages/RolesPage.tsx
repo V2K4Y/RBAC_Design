@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Role, Module, Action } from '../types';
+import { Role, ModuleAction } from '../types';
 
 const RolesPage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
-  const [modules, setModules] = useState<Module[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [modules, setModules] = useState<ModuleAction[]>([]);
   const [roleModuleActions, setRoleModuleActions] = useState<any[]>([]); // For roles and their module-actions
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
@@ -13,9 +14,10 @@ const RolesPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [rolesRes, modulesRes, roleModuleActionsRes] = await Promise.all([
           api.get<{ data: Role[] }>('/roles'),
-          api.get<{ data: Module[] }>('/modules'),
+          api.get<{ data: ModuleAction[] }>('/module-actions'),
           api.get<{ data: any[] }>('/module-actions-role'),
         ]);
         setRoles(rolesRes.data.data);
@@ -24,6 +26,7 @@ const RolesPage: React.FC = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -37,6 +40,7 @@ const RolesPage: React.FC = () => {
     }
 
     try {
+      setLoading(true);
       await api.post('/module-actions-role/assign', {
         roleId: selectedRole,
         moduleActionId: selectedAction, // Send the moduleActionId in the request
@@ -46,6 +50,7 @@ const RolesPage: React.FC = () => {
       console.error('Error assigning Module Action to Role:', error);
       alert('Failed to assign Module Action to Role');
     }
+    setLoading(false);
   };
 
   // Get actions for the selected module
@@ -54,7 +59,7 @@ const RolesPage: React.FC = () => {
     : [];
 
   return (
-    <div className="p-6">
+    !loading ? <div className="p-6">
       <h1 className="text-2xl font-bold mb-10">Assign Module Related Actions for Roles</h1>
       <div className="grid grid-cols-3 gap-4">
         <div>
@@ -106,6 +111,7 @@ const RolesPage: React.FC = () => {
       <button
         onClick={assignModuleActionToRole}
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        disabled = {loading}
       >
         Assign Module Action to Role
       </button>
@@ -144,6 +150,8 @@ const RolesPage: React.FC = () => {
           </tbody>
         </table>
       </div>
+    </div> : <div className='h-screen flex justify-center items-center'>
+      Loading...
     </div>
   );
 };

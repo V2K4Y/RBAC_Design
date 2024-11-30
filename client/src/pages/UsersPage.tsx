@@ -5,17 +5,24 @@ import { User, Role } from '../types';
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersRes = await api.get<User[]>('/users');
+        setLoading(true);
+        const [usersRes, rolesRes] = await Promise.all([
+          api.get<User[]>('/users'),
+          api.get<{data: Role []}>('/roles')
+        ]);
         setUsers(usersRes.data);
+        setRoles(rolesRes.data.data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -28,6 +35,7 @@ const UsersPage: React.FC = () => {
     }
 
     try {
+      setLoading(true);
       await api.post('/user-roles/assign', {
         userId: selectedUser,
         roleId: selectedRole,
@@ -37,10 +45,15 @@ const UsersPage: React.FC = () => {
       console.error('Error assigning role to user:', error);
       alert('Failed to assign role to user');
     }
+    setLoading(false);
   };
 
+  const filteredRoles = selectedUser ? roles.filter((role) => {
+    return !users.find((user) => user.id === selectedUser)?.roles.includes(role.name)
+  }): roles;
+
   return (
-    <div className="p-6">
+    !loading ? <div className="p-6">
 
       {/* Role Assignment Section */}
       <h2 className="text-xl font-bold mt-10 mb-4">Assign Roles to Users</h2>
@@ -68,7 +81,7 @@ const UsersPage: React.FC = () => {
             onChange={(e) => setSelectedRole(Number(e.target.value))}
           >
             <option value="">Choose Role</option>
-            {roles.map((role) => (
+            {filteredRoles.map((role) => (
               <option key={role.id} value={role.id}>
                 {role.name}
               </option>
@@ -79,6 +92,7 @@ const UsersPage: React.FC = () => {
       <button
         onClick={assignRoleToUser}
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        disabled={loading}
       >
         Assign Role
       </button>
@@ -109,6 +123,8 @@ const UsersPage: React.FC = () => {
           ))}
         </tbody>
       </table>
+    </div>: <div className='h-screen flex justify-center items-center'>
+      Loading...
     </div>
   );
 };
