@@ -1,25 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Action, ModuleAction } from '../types';
 
 const ModulesPage: React.FC = () => {
   const [modules, setModules] = useState<any[]>([]);
+  const [actions, setActions] = useState<any[]>([]);
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   const [selectedAction, setSelectedAction] = useState<number | null>(null);
 
-  // Fetch modules and their actions
+  // Fetch modules and actions data
   useEffect(() => {
     const fetchModulesWithActions = async () => {
       try {
-        const response = await api.get<{ data: any[] }>('/module-actions');
-        setModules(response.data.data);
+        // Fetch modules and actions from APIs
+        const [modulesRes, actionsRes] = await Promise.all([
+          api.get<{ data: ModuleAction[] }>('/module-actions'),
+          api.get<{ data: Action[] }>('/actions'),
+        ]);
+        setModules(modulesRes.data.data);
+        setActions(actionsRes.data.data);
       } catch (error) {
-        console.error('Error fetching modules with actions:', error);
+        console.error('Error fetching modules and actions:', error);
       }
     };
 
     fetchModulesWithActions();
   }, []);
 
+  // Assign action to a module
   const assignActionToModule = async () => {
     if (!selectedModule || !selectedAction) {
       alert('Please select both a module and an action');
@@ -32,15 +40,26 @@ const ModulesPage: React.FC = () => {
         actionId: selectedAction,
       });
       alert('Action assigned to module successfully');
+      // Refresh modules data after assignment
+      const response = await api.get<{ data: any[] }>('/module-actions');
+      setModules(response.data.data);
     } catch (error) {
       console.error('Error assigning action to module:', error);
       alert('Failed to assign action to module');
     }
   };
 
+  // Filter actions not yet associated with the selected module
+  const filteredActions = selectedModule
+    ? actions.filter((action) =>
+        !modules
+          .find((module) => module.id === selectedModule)
+          ?.moduleActions.some((moduleAction: any) => moduleAction.id === action.id)
+      )
+    : actions;
+
   return (
     <div className="p-6">
-
       {/* Assign Actions to Modules */}
       <h2 className="text-xl font-bold mt-10 mb-4">Assign Actions to Modules</h2>
       <div className="grid grid-cols-2 gap-4">
@@ -67,14 +86,11 @@ const ModulesPage: React.FC = () => {
             onChange={(e) => setSelectedAction(Number(e.target.value))}
           >
             <option value="">Select Action</option>
-            {/* Populate actions from all modules */}
-            {modules
-              .flatMap((module) => module.moduleActions)
-              .map((action: any) => (
-                <option key={action.moduleActionId} value={action.moduleActionId}>
-                  {action.name}
-                </option>
-              ))}
+            {filteredActions.map((action: any) => (
+              <option key={action.id} value={action.id}>
+                {action.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -85,9 +101,8 @@ const ModulesPage: React.FC = () => {
         Assign Action to Module
       </button>
 
-      <h1 className="text-xl font-bold mb-5 mt-16">Modules and Their Actions</h1>
-
       {/* Modules and Actions Display */}
+      <h1 className="text-xl font-bold mb-5 mt-16">Modules and Their Actions</h1>
       <div className="rounded p-4">
         <table className="table-auto w-full border-collapse border border-gray-300">
           <thead>

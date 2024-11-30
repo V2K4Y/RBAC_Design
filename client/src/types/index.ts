@@ -2,7 +2,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: string;
+  roles: string[];
 }
 
 export interface AuthResponse {
@@ -36,4 +36,14 @@ export interface Action {
   id: number;
   name: string;
   description?: string;
+}
+
+export interface ModuleAction {
+  id: number;
+  name: string;
+  moduleActions: {
+    id: number;
+    name: string;
+    moduleActionId: number;
+  }[]
 }

@@ -17,9 +17,12 @@ const HomePage: React.FC = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-lg text-center">
         <h2 className="text-3xl font-bold text-blue-600 mb-4">Welcome to Our System</h2>
-        <p className="text-gray-700 mb-6">
+        <p className="text-gray-700 mb-3">
           This system helps manage your roles, modules, and permissions with a role-based access control (RBAC) system.
           Secure your platform with customizable roles for different users, such as Admin, Editor, and Viewer.
+        </p>
+        <p className='mb-6 bg-gray-500 text-white rounded-full py-2'>
+          The first user created will have "Admin" privilege.
         </p>
         
         {/* Call to Action for Users to Log In or Sign Up */}
