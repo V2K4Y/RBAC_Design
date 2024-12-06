@@ -6,6 +6,7 @@ export const rolePermissionMiddleware = (moduleName: string, actionName: string)
     const userId = (req as any).user.id;
 
     try {
+      // Getting users roles and permission
       const userRoles = await prisma.userRole.findUnique({
         where: { id: userId },
         include: {
@@ -26,6 +27,7 @@ export const rolePermissionMiddleware = (moduleName: string, actionName: string)
         },
       });
 
+      // Verifying if user have sufficient permission.
       const hasPermission = userRoles?.role.moduleActionsRoles.some(
         (moduleActionsRole) =>
           moduleActionsRole.moduleAction.module.name === moduleName &&
@@ -33,12 +35,14 @@ export const rolePermissionMiddleware = (moduleName: string, actionName: string)
       )
 
       if (!hasPermission) {
-        return res.status(403).json({ status: 'error', message: 'Access denied: Insufficient permissions' });
+        res.status(403).json({ status: 'error', message: 'Access denied: Insufficient permissions' });
+        return
       }
 
       next();
     } catch (error) {
-      return res.status(500).json({ status: 'error', message: 'Error checking permissions', error: (error as any).message });
+      res.status(500).json({ status: 'error', message: 'Error checking permissions', error: (error as any).message });
+      return 
     }
   };
 };
